@@ -59,7 +59,7 @@ function ChecklistApp() {
     <NativeBaseProvider>
       <ScrollView keyboardShouldPersistTaps="handled" style={styles.scrollView}>
         <View style={styles.titleContainer}>
-          <Text style={styles.titleText}>Checklist Maker</Text>
+          <Text style={styles.titleText}>Checklist Makers</Text>
         </View>
         <Divider my="2" bg="indigo.500" thickness={2} marginBottom={5} />
         <View style={styles.container}>
