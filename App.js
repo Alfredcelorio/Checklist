@@ -15,19 +15,13 @@ function ChecklistApp() {
   };
 
   const toggleTask = (task) => {
-    console.log("Toggling task: ", task);
-
     setCompletedTasks((prevCompletedTasks) => {
-      console.log("Current completedTasks: ", prevCompletedTasks);
-
       let newCompletedTasks;
       if (prevCompletedTasks.includes(task)) {
         newCompletedTasks = prevCompletedTasks.filter((t) => t !== task);
       } else {
         newCompletedTasks = [...prevCompletedTasks, task];
       }
-
-      console.log("New completedTasks: ", newCompletedTasks);
       return newCompletedTasks;
     });
   };
@@ -55,6 +49,10 @@ function ChecklistApp() {
     );
   };
 
+  const uncheckAll = () => {
+    setCompletedTasks([]);
+  };
+
   return (
     <NativeBaseProvider>
       <ScrollView keyboardShouldPersistTaps="handled" style={styles.scrollView}>
@@ -64,18 +62,6 @@ function ChecklistApp() {
         <Divider my="2" bg="indigo.500" thickness={2} marginBottom={5} />
         <View style={styles.container}>
           <Box p={3}>
-            <Input
-              size="xl"
-              color="white"
-              marginBottom={5}
-              placeholder="New Task"
-              placeholderTextColor="#E1E1E1"
-              value={task}
-              onChangeText={(text) => setTask(text)}
-            />
-            <TouchableOpacity onPress={addTask}>
-              <Text style={styles.addButton}>Add Task</Text>
-            </TouchableOpacity>
             {tasks.map((task, index) => (
               <Checkbox
                 key={index}
@@ -94,8 +80,27 @@ function ChecklistApp() {
               </Checkbox>
             ))}
           </Box>
+          {/* New View to contain buttons and input */}
         </View>
       </ScrollView>
+      <View style={styles.buttonContainer}>
+            <Input
+              size="xl"
+              color="white"
+              marginBottom={5}
+              placeholder="New Task"
+              placeholderTextColor="#E1E1E1"
+              value={task}
+              onChangeText={(text) => setTask(text)}
+            />
+            <TouchableOpacity onPress={addTask}>
+              <Text style={styles.addButton}>Add Task</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={uncheckAll}>
+              <Text style={styles.uncheckButton}>Uncheck All</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.blackBox}></View> 
     </NativeBaseProvider>
   );
 }
@@ -133,6 +138,27 @@ const styles = StyleSheet.create({
   scrollView: {
     backgroundColor: 'black',
   },
+  uncheckButton: {
+    backgroundColor: 'red',
+    color: 'white',
+    padding: 10,
+    textAlign: 'center',
+    borderRadius: 0,
+    marginBottom: 0,
+  },
+  // New style for buttonContainer
+  buttonContainer: {
+    backgroundColor: "black",
+    flex: 1,
+    justifyContent: 'flex-end',
+    marginBottom: 0,
+  },
+  blackBox: {
+    backgroundColor: 'black',
+    height: 50, // or whatever height you want
+    margin: 0,  // optional, for spacing
+    borderRadius: 0, // optional, for rounded corners
+  }  
 });
 
 export default ChecklistApp;
