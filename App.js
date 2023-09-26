@@ -109,8 +109,8 @@ export default function App() {
             style={styles.keyboardView}
         >
             <Box alignItems="center" style={styles.footer}>
-                <Input mx="3" placeholder="Enter new task..." w="100%" value={newTask} onChangeText={setNewTask} />
-                <Button onPress={addNewTask}>Add Task</Button>
+                <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
+                <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
             </Box>
         </KeyboardAvoidingView>
         </GestureHandlerRootView>
@@ -170,10 +170,15 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    marginTop:'50',
+    marginTop:'10',
     paddingHorizontal: 10,
     fontSize: 18,
     color: 'white',
     backgroundColor: 'black',
-  }
+  },
+  addButton: {
+    width: '95%',
+    alignSelf: 'center', // This will center the button horizontally
+    marginBottom: 20
+  },  
 });
