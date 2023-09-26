@@ -1,164 +1,179 @@
-import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
-import { NativeBaseProvider, Input, Box, Checkbox, Divider } from 'native-base';
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import DraggableFlatList from "react-native-draggable-flatlist";
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { Box, Button, Input, NativeBaseProvider, ScrollView } from 'native-base';
 
-function ChecklistApp() {
-  const [task, setTask] = useState('');
-  const [tasks, setTasks] = useState([]);
-  const [completedTasks, setCompletedTasks] = useState([]);
+const initialTasks = [
+  { key: '1', label: 'Buy groceries', completed: false },
+  // ... other initial tasks
+];
 
-  const addTask = () => {
-    if (task) {
-      setTasks([...tasks, task]);
-      setTask('');
-    }
-  };
+export default function App() {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [newTask, setNewTask] = useState('');
+  const [editingKey, setEditingKey] = useState(null);
+  const [editingValue, setEditingValue] = useState('');
 
-  const toggleTask = (task) => {
-    setCompletedTasks((prevCompletedTasks) => {
-      let newCompletedTasks;
-      if (prevCompletedTasks.includes(task)) {
-        newCompletedTasks = prevCompletedTasks.filter((t) => t !== task);
-      } else {
-        newCompletedTasks = [...prevCompletedTasks, task];
-      }
-      return newCompletedTasks;
-    });
-  };
-
-  const deleteTask = (taskToDelete) => {
-    setTasks(tasks.filter((task) => task !== taskToDelete));
-    setCompletedTasks(completedTasks.filter((task) => task !== taskToDelete));
-  };
-
-  const confirmDelete = (task) => {
-    Alert.alert(
-      'Delete Task',
-      `Are you sure you want to delete "${task}"?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: () => deleteTask(task),
-        },
-      ],
-      { cancelable: false }
+  const toggleCompletion = (key) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.key === key ? { ...task, completed: !task.completed } : task
+      )
     );
   };
 
-  const uncheckAll = () => {
-    setCompletedTasks([]);
+  const addNewTask = () => {
+    if (newTask.trim().length > 0) {
+      setTasks(prevTasks => [
+        ...prevTasks,
+        { key: Date.now().toString(), label: newTask, completed: false }
+      ]);
+      setNewTask('');
+    }
+  };
+
+  const deleteTask = (key) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.key !== key));
+  };
+
+  const startEditing = (key, label) => {
+    setEditingKey(key);
+    setEditingValue(label);
+  };
+
+  const finishEditing = () => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.key === editingKey ? { ...task, label: editingValue } : task
+      )
+    );
+    setEditingKey(null);
+    setEditingValue('');
+  };
+
+  const renderLeftActions = (progress, dragX, item) => {
+    return (
+      <Box flexDirection="row" height={50} backgroundColor="black">
+        <TouchableOpacity onPress={() => startEditing(item.key, item.label)} style={styles.editBox}>
+          <Text style={styles.editText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => deleteTask(item.key)} style={styles.deleteBox}>
+          <Text style={styles.deleteText}>Delete</Text>
+        </TouchableOpacity>
+      </Box>
+    );
+  };
+
+  const renderItem = ({ item, drag, isActive }) => {
+    if (editingKey === item.key) {
+      return (
+        <TextInput
+          style={styles.input}
+          value={editingValue}
+          onChangeText={setEditingValue}
+          onBlur={finishEditing}
+          autoFocus
+        />
+      );
+    }
+
+    return (
+      <Swipeable renderRightActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}>
+        <TouchableOpacity
+          onLongPress={drag}
+          onPress={() => toggleCompletion(item.key)}
+          style={[
+            styles.rowItem,
+            { backgroundColor: isActive ? "red" : item.completed ? 'green' : 'black' },
+          ]}
+        >
+          <Text style={styles.text}>{item.label}</Text>
+        </TouchableOpacity>
+      </Swipeable>
+    );
   };
 
   return (
     <NativeBaseProvider>
-      <ScrollView keyboardShouldPersistTaps="handled" style={styles.scrollView}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.titleText}>Checklist Makers</Text>
-        </View>
-        <Divider my="2" bg="indigo.500" thickness={2} marginBottom={5} />
-        <View style={styles.container}>
-          <Box p={3}>
-            {tasks.map((task, index) => (
-              <Checkbox
-                key={index}
-                value={task}
-                isChecked={completedTasks.includes(task)}
-                onChange={() => toggleTask(task)}
-                size="sm"
-                color="white"
-                marginLeft={60}
-                marginTop={5}
-                _text={{ color: 'white' }}
-              >
-                <TouchableOpacity onLongPress={() => confirmDelete(task)}>
-                  <Text style={{ color: 'white' }}>{task}</Text>
-                </TouchableOpacity>
-              </Checkbox>
-            ))}
-          </Box>
-          {/* New View to contain buttons and input */}
-        </View>
-      </ScrollView>
-      <View style={styles.buttonContainer}>
-            <Input
-              size="xl"
-              color="white"
-              marginBottom={5}
-              placeholder="New Task"
-              placeholderTextColor="#E1E1E1"
-              value={task}
-              onChangeText={(text) => setTask(text)}
-            />
-            <TouchableOpacity onPress={addTask}>
-              <Text style={styles.addButton}>Add Task</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={uncheckAll}>
-              <Text style={styles.uncheckButton}>Uncheck All</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.blackBox}></View> 
+      <GestureHandlerRootView style={styles.container}>
+        <DraggableFlatList
+          data={tasks}
+          onDragEnd={({ data }) => setTasks(data)}
+          keyExtractor={(item) => item.key}
+          renderItem={renderItem}
+          contentContainerStyle={{ backgroundColor: 'black' }}
+        />
+      <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"} 
+            style={styles.keyboardView}
+        >
+            <Box alignItems="center" style={styles.footer}>
+                <Input mx="3" placeholder="Enter new task..." w="100%" value={newTask} onChangeText={setNewTask} />
+                <Button onPress={addNewTask}>Add Task</Button>
+            </Box>
+        </KeyboardAvoidingView>
+        </GestureHandlerRootView>
     </NativeBaseProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    padding: 10,
-    paddingLeft: 36,
-    paddingRight: 36,
-    paddingBottom: 2,
-    marginTop: 70,
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    backgroundColor: 'black',
-  },
-  titleText: {
-    color: '#F2F2F2',
-    fontSize: 32,
-    fontWeight: '600',
-    letterSpacing: -0.165,
-    marginBottom: 20,
-  },
   container: {
     flex: 1,
     backgroundColor: 'black',
   },
-  addButton: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: 10,
-    textAlign: 'center',
-    borderRadius: 5,
-    marginBottom: 10,
+  rowItem: {
+    height: 50,
+    width: '100%',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  scrollView: {
+  text: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  footer: {
+    paddingBottom: 10,
     backgroundColor: 'black',
   },
-  uncheckButton: {
-    backgroundColor: 'red',
-    color: 'white',
-    padding: 10,
-    textAlign: 'center',
-    borderRadius: 0,
-    marginBottom: 0,
-  },
-  // New style for buttonContainer
-  buttonContainer: {
-    backgroundColor: "black",
+  keyboardView: {
     flex: 1,
     justifyContent: 'flex-end',
-    marginBottom: 0,
+    marginBottom: 18,
   },
-  blackBox: {
+  deleteBox: {
     backgroundColor: 'black',
-    height: 50, // or whatever height you want
-    margin: 0,  // optional, for spacing
-    borderRadius: 0, // optional, for rounded corners
-  }  
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: 50,
+  },
+  deleteText: {
+    color: 'white',
+    paddingHorizontal: 10,
+    fontWeight: 'bold',
+  },
+  editBox: {
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: 50,
+  },
+  editText: {
+    color: 'white',
+    paddingHorizontal: 10,
+    fontWeight: 'bold',
+  },
+  input: {
+    height: 50,
+    marginTop:'50',
+    paddingHorizontal: 10,
+    fontSize: 18,
+    color: 'white',
+    backgroundColor: 'black',
+  }
 });
-
-export default ChecklistApp;
