@@ -26,13 +26,13 @@ export default function App() {
             key: 1,
             value: completedTasks,
             svg: { fill: 'green' },
-            arc: { outerRadius: '100%', cornerRadius: 10 },
+            arc: { outerRadius: '140%', cornerRadius: 10 },
         },
         {
             key: 2,
             value: unmarkedTasks,
             svg: { fill: 'red' },
-            arc: { outerRadius: '100%', cornerRadius: 13 },
+            arc: { outerRadius: '140%', cornerRadius: 13 },
         },
     ];
 
@@ -139,8 +139,8 @@ export default function App() {
                     </Box>
                     <TouchableOpacity onPress={togglePercentage}>
                      <PieChart
-                    style={{ height: 200 }}
-                    outerRadius={'80%'}
+                    style={{ height: 400 }}
+                    outerRadius={'50%'}
                     innerRadius={10}
                     data={data}
                 />
@@ -234,7 +234,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "white",
     textAlign: "center",
-    marginTop: 10,
+    marginTop: 20,
+    marginBottom: 20,
+    fontWeight: 'bold',
   },
 });
 
