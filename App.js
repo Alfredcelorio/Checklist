@@ -1,184 +1,217 @@
 import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-import { Box, Button, Input, NativeBaseProvider, ScrollView } from 'native-base';
+import { Box, Button, Input, NativeBaseProvider } from 'native-base';
+import { PieChart } from 'react-native-svg-charts';
+import { Circle, G, Line } from 'react-native-svg';
 
 const initialTasks = [
-  { key: '1', label: 'Buy groceries', completed: false },
-  // ... other initial tasks
+    { key: '1', label: 'Buy groceries', completed: false },
 ];
 
 export default function App() {
-  const [tasks, setTasks] = useState(initialTasks);
-  const [newTask, setNewTask] = useState('');
-  const [editingKey, setEditingKey] = useState(null);
-  const [editingValue, setEditingValue] = useState('');
+    const [tasks, setTasks] = useState(initialTasks);
+    const [newTask, setNewTask] = useState('');
+    const [editingKey, setEditingKey] = useState(null);
+    const [editingValue, setEditingValue] = useState('');
 
-  const toggleCompletion = (key) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.key === key ? { ...task, completed: !task.completed } : task
-      )
-    );
-  };
+    const completedTasks = tasks.filter(task => task.completed).length;
+    const unmarkedTasks = tasks.length - completedTasks;
 
-  const addNewTask = () => {
-    if (newTask.trim().length > 0) {
-      setTasks(prevTasks => [
-        ...prevTasks,
-        { key: Date.now().toString(), label: newTask, completed: false }
-      ]);
-      setNewTask('');
-    }
-  };
+    const data = [
+        {
+            key: 1,
+            value: completedTasks,
+            svg: { fill: 'green' },
+            arc: { outerRadius: '110%', cornerRadius: 10 },
+        },
+        {
+            key: 2,
+            value: unmarkedTasks,
+            svg: { fill: 'red' },
+            arc: { outerRadius: '70%', cornerRadius: 10 },
+        },
+    ];
 
-  const deleteTask = (key) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.key !== key));
-  };
+    const toggleCompletion = (key) => {
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
+                task.key === key ? { ...task, completed: !task.completed } : task
+            )
+        );
+    };
 
-  const startEditing = (key, label) => {
-    setEditingKey(key);
-    setEditingValue(label);
-  };
+    const addNewTask = () => {
+        if (newTask.trim().length > 0) {
+            setTasks(prevTasks => [
+                ...prevTasks,
+                { key: Date.now().toString(), label: newTask, completed: false }
+            ]);
+            setNewTask('');
+        }
+    };
 
-  const finishEditing = () => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.key === editingKey ? { ...task, label: editingValue } : task
-      )
-    );
-    setEditingKey(null);
-    setEditingValue('');
-  };
+    const deleteTask = (key) => {
+        setTasks(prevTasks => prevTasks.filter(task => task.key !== key));
+    };
 
-  const renderLeftActions = (progress, dragX, item) => {
-    return (
-      <Box flexDirection="row" height={50} backgroundColor="black">
-        <TouchableOpacity onPress={() => startEditing(item.key, item.label)} style={styles.editBox}>
-          <Text style={styles.editText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => deleteTask(item.key)} style={styles.deleteBox}>
-          <Text style={styles.deleteText}>Delete</Text>
-        </TouchableOpacity>
-      </Box>
-    );
-  };
+    const startEditing = (key, label) => {
+        setEditingKey(key);
+        setEditingValue(label);
+    };
 
-  const renderItem = ({ item, drag, isActive }) => {
-    if (editingKey === item.key) {
-      return (
-        <TextInput
-          style={styles.input}
-          value={editingValue}
-          onChangeText={setEditingValue}
-          onBlur={finishEditing}
-          autoFocus
-        />
-      );
-    }
+    const finishEditing = () => {
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
+                task.key === editingKey ? { ...task, label: editingValue } : task
+            )
+        );
+        setEditingKey(null);
+        setEditingValue('');
+    };
 
-    return (
-      <Swipeable renderRightActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}>
-        <TouchableOpacity
-          onLongPress={drag}
-          onPress={() => toggleCompletion(item.key)}
-          style={[
-            styles.rowItem,
-            { backgroundColor: isActive ? "red" : item.completed ? 'green' : 'black' },
-          ]}
-        >
-          <Text style={styles.text}>{item.label}</Text>
-        </TouchableOpacity>
-      </Swipeable>
-    );
-  };
-
-  return (
-    <NativeBaseProvider>
-      <GestureHandlerRootView style={styles.container}>
-        <DraggableFlatList
-          data={tasks}
-          onDragEnd={({ data }) => setTasks(data)}
-          keyExtractor={(item) => item.key}
-          renderItem={renderItem}
-          contentContainerStyle={{ backgroundColor: 'black' }}
-        />
-      <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"} 
-            style={styles.keyboardView}
-        >
-            <Box alignItems="center" style={styles.footer}>
-                <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
-                <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
+    const renderLeftActions = (progress, dragX, item) => {
+        return (
+            <Box flexDirection="row" height={50} backgroundColor="black">
+                <TouchableOpacity onPress={() => startEditing(item.key, item.label)} style={styles.editBox}>
+                    <Text style={styles.editText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteTask(item.key)} style={styles.deleteBox}>
+                    <Text style={styles.deleteText}>Delete</Text>
+                </TouchableOpacity>
             </Box>
-        </KeyboardAvoidingView>
-        </GestureHandlerRootView>
-    </NativeBaseProvider>
-  );
+        );
+    };
+
+    const renderItem = ({ item, drag, isActive }) => {
+        if (editingKey === item.key) {
+            return (
+                <TextInput
+                    style={styles.input}
+                    value={editingValue}
+                    onChangeText={setEditingValue}
+                    onBlur={finishEditing}
+                    autoFocus
+                />
+            );
+        }
+
+        return (
+            <Swipeable renderRightActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}>
+                <TouchableOpacity
+                    onLongPress={drag}
+                    onPress={() => toggleCompletion(item.key)}
+                    style={[
+                        styles.rowItem,
+                        { backgroundColor: isActive ? "red" : item.completed ? 'green' : 'black' },
+                    ]}
+                >
+                    <Text style={styles.text}>{item.label}</Text>
+                </TouchableOpacity>
+            </Swipeable>
+        );
+    };
+
+    return (
+        <NativeBaseProvider>
+            <GestureHandlerRootView style={styles.container}>
+            <Box backgroundColor="black" height={100} width="100%"></Box>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={styles.keyboardView}
+                >
+                     <PieChart
+                    style={{ height: 200 }}
+                    outerRadius={'80%'}
+                    innerRadius={10}
+                    data={data}
+                />
+                <View style={styles.taskListContainer}>
+                <DraggableFlatList
+                    data={tasks}
+                    onDragEnd={({ data }) => setTasks(data)}
+                    keyExtractor={(item) => item.key}
+                    renderItem={renderItem}
+                    contentContainerStyle={{ backgroundColor: 'black' }}
+                />
+                </View>
+                    <Box alignItems="center" style={styles.footer}>
+                        <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
+                        <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
+                    </Box>
+                </KeyboardAvoidingView>
+            </GestureHandlerRootView>
+        </NativeBaseProvider>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
+    container: {
+        flex: 1,
+        backgroundColor: 'black',
+    },
+    rowItem: {
+        height: 50,
+        width: '100%',
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    text: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    footer: {
+        paddingBottom: 10,
+        backgroundColor: 'black',
+    },
+    keyboardView: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        marginBottom: 18,
+    },
+    deleteBox: {
+        backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 100,
+        height: 50,
+    },
+    deleteText: {
+        color: 'white',
+        paddingHorizontal: 10,
+        fontWeight: 'bold',
+    },
+    editBox: {
+        backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 100,
+        height: 50,
+    },
+    editText: {
+        color: 'white',
+        paddingHorizontal: 10,
+        fontWeight: 'bold',
+    },
+    input: {
+        height: 50,
+        marginTop: '10',
+        paddingHorizontal: 10,
+        fontSize: 18,
+        color: 'white',
+        backgroundColor: 'black',
+    },
+    addButton: {
+        width: '95%',
+        alignSelf: 'center',
+        marginBottom: 20
+    },
+    taskListContainer: {
+      height: 500,  // Adjust this height based on your needs
+      overflow: 'scroll',  // This ensures the list is scrollable
   },
-  rowItem: {
-    height: 50,
-    width: '100%',
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  footer: {
-    paddingBottom: 10,
-    backgroundColor: 'black',
-  },
-  keyboardView: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    marginBottom: 18,
-  },
-  deleteBox: {
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 50,
-  },
-  deleteText: {
-    color: 'white',
-    paddingHorizontal: 10,
-    fontWeight: 'bold',
-  },
-  editBox: {
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 50,
-  },
-  editText: {
-    color: 'white',
-    paddingHorizontal: 10,
-    fontWeight: 'bold',
-  },
-  input: {
-    height: 50,
-    marginTop:'10',
-    paddingHorizontal: 10,
-    fontSize: 18,
-    color: 'white',
-    backgroundColor: 'black',
-  },
-  addButton: {
-    width: '95%',
-    alignSelf: 'center', // This will center the button horizontally
-    marginBottom: 20
-  },  
 });
+
