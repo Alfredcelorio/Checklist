@@ -117,10 +117,10 @@ export default function App() {
         <NativeBaseProvider>
             <GestureHandlerRootView style={styles.container}>
             <Box backgroundColor="black" height={100} width="100%"></Box>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    style={styles.keyboardView}
-                >
+            <Box alignItems="center" style={styles.footer}>
+                        <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
+                        <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
+                    </Box>
                      <PieChart
                     style={{ height: 200 }}
                     outerRadius={'80%'}
@@ -136,11 +136,6 @@ export default function App() {
                     contentContainerStyle={{ backgroundColor: 'black' }}
                 />
                 </View>
-                    <Box alignItems="center" style={styles.footer}>
-                        <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
-                        <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
-                    </Box>
-                </KeyboardAvoidingView>
             </GestureHandlerRootView>
         </NativeBaseProvider>
     );
@@ -210,8 +205,7 @@ const styles = StyleSheet.create({
         marginBottom: 20
     },
     taskListContainer: {
-      height: 500,  // Adjust this height based on your needs
-      overflow: 'scroll',  // This ensures the list is scrollable
+        flex: 1,
   },
 });
 
