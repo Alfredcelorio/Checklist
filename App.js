@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import React, { useState, useRef } from "react";
+import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Platform, ScrollView, View, Animated } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { Box, Button, Input, NativeBaseProvider } from 'native-base';
@@ -15,6 +15,8 @@ export default function App() {
     const [newTask, setNewTask] = useState('');
     const [editingKey, setEditingKey] = useState(null);
     const [editingValue, setEditingValue] = useState('');
+    const [showPercentage, setShowPercentage] = useState(false);
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const completedTasks = tasks.filter(task => task.completed).length;
     const unmarkedTasks = tasks.length - completedTasks;
@@ -24,13 +26,13 @@ export default function App() {
             key: 1,
             value: completedTasks,
             svg: { fill: 'green' },
-            arc: { outerRadius: '110%', cornerRadius: 10 },
+            arc: { outerRadius: '100%', cornerRadius: 10 },
         },
         {
             key: 2,
             value: unmarkedTasks,
             svg: { fill: 'red' },
-            arc: { outerRadius: '70%', cornerRadius: 10 },
+            arc: { outerRadius: '100%', cornerRadius: 13 },
         },
     ];
 
@@ -84,6 +86,19 @@ export default function App() {
         );
     };
 
+    const togglePercentage = () => {
+        const newValue = showPercentage ? 0 : 1;
+        setShowPercentage(!showPercentage);
+        Animated.timing(fadeAnim, {
+          toValue: newValue,
+          duration: 2000,
+          useNativeDriver: true,
+        }).start();
+      };
+
+    const percentageCompleted = (completedTasks / tasks.length) * 100;
+
+
     const renderItem = ({ item, drag, isActive }) => {
         if (editingKey === item.key) {
             return (
@@ -96,6 +111,7 @@ export default function App() {
                 />
             );
         }
+
 
         return (
             <Swipeable renderRightActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}>
@@ -121,12 +137,19 @@ export default function App() {
                         <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
                         <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
                     </Box>
+                    <TouchableOpacity onPress={togglePercentage}>
                      <PieChart
                     style={{ height: 200 }}
                     outerRadius={'80%'}
                     innerRadius={10}
                     data={data}
                 />
+                 </TouchableOpacity>
+                 {showPercentage && (
+                 <Animated.Text style={{ ...styles.percentageText, opacity: fadeAnim }}>
+                  {`${percentageCompleted.toFixed(2)}% Completed`}
+                  </Animated.Text>
+                  )}
                 <View style={styles.taskListContainer}>
                 <DraggableFlatList
                     data={tasks}
@@ -206,6 +229,12 @@ const styles = StyleSheet.create({
     },
     taskListContainer: {
         flex: 1,
+  },
+  percentageText: {
+    fontSize: 18,
+    color: "white",
+    textAlign: "center",
+    marginTop: 10,
   },
 });
 
