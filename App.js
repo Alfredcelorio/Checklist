@@ -3,8 +3,7 @@ import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Pl
 import DraggableFlatList from "react-native-draggable-flatlist";
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { Box, Button, Input, NativeBaseProvider } from 'native-base';
-import { PieChart } from 'react-native-svg-charts';
-import { Circle, G, Line } from 'react-native-svg';
+import { ProgressCircle } from 'react-native-svg-charts';
 
 const initialTasks = [
     { key: '1', label: 'Buy groceries', completed: false },
@@ -16,25 +15,12 @@ export default function App() {
     const [editingKey, setEditingKey] = useState(null);
     const [editingValue, setEditingValue] = useState('');
     const [showPercentage, setShowPercentage] = useState(false);
-    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(1)).current;
 
     const completedTasks = tasks.filter(task => task.completed).length;
     const unmarkedTasks = tasks.length - completedTasks;
 
-    const data = [
-        {
-            key: 1,
-            value: completedTasks,
-            svg: { fill: 'green' },
-            arc: { outerRadius: '140%', cornerRadius: 10 },
-        },
-        {
-            key: 2,
-            value: unmarkedTasks,
-            svg: { fill: 'black' },
-            arc: { outerRadius: '140%', cornerRadius: 13 },
-        },
-    ];
+
 
     const toggleCompletion = (key) => {
         setTasks(prevTasks =>
@@ -91,7 +77,7 @@ export default function App() {
         setShowPercentage(!showPercentage);
         Animated.timing(fadeAnim, {
           toValue: newValue,
-          duration: 2000,
+          duration: 10,
           useNativeDriver: true,
         }).start();
       };
@@ -132,32 +118,33 @@ export default function App() {
     return (
         <NativeBaseProvider>
             <GestureHandlerRootView style={styles.container}>
-            <Box backgroundColor="black" height={100} width="100%"></Box>
-            <Box alignItems="center" style={styles.footer}>
-                        <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
-                        <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
-                    </Box>
-                    <TouchableOpacity onPress={togglePercentage}>
-                     <PieChart
-                    style={{ height: 400 }}
-                    outerRadius={'50%'}
-                    innerRadius={10}
-                    data={data}
-                />
-                 </TouchableOpacity>
-                 {showPercentage && (
-                 <Animated.Text style={{ ...styles.percentageText, opacity: fadeAnim }}>
-                  {`${percentageCompleted.toFixed(2)}% Completed`}
-                  </Animated.Text>
-                  )}
+                <Box backgroundColor="black" height={100} width="100%"></Box>
+                <Box alignItems="center" style={styles.footer}>
+                    <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
+                    <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
+                </Box>
+                <View style={styles.chartContainer}>
+                <ProgressCircle
+                        style={{ height: 400 }}
+                        progress={completedTasks / tasks.length}
+                        progressColor='green'
+                    />
+                    <Animated.Text style={{ ...styles.percentageText, opacity: fadeAnim }}>
+                   {`${percentageCompleted.toFixed(2)}%`}
+                    </Animated.Text>
+
+                    </View>
+                    
+                 
+                  
                 <View style={styles.taskListContainer}>
-                <DraggableFlatList
-                    data={tasks}
-                    onDragEnd={({ data }) => setTasks(data)}
-                    keyExtractor={(item) => item.key}
-                    renderItem={renderItem}
-                    contentContainerStyle={{ backgroundColor: 'black' }}
-                />
+                    <DraggableFlatList
+                        data={tasks}
+                        onDragEnd={({ data }) => setTasks(data)}
+                        keyExtractor={(item) => item.key}
+                        renderItem={renderItem}
+                        contentContainerStyle={{ backgroundColor: 'black' }}
+                    />
                 </View>
             </GestureHandlerRootView>
         </NativeBaseProvider>
@@ -165,6 +152,22 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+    chartContainer: {
+        borderColor: 'black',
+        borderWidth: 2,
+        marginBottom: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
+    percentageText: {
+        position: 'absolute',
+        fontSize: 50,
+        color: "white",
+        fontWeight: 'bold',
+        textAlign: "center",
+    },
+
     container: {
         flex: 1,
         backgroundColor: 'black',
@@ -216,7 +219,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 50,
-        marginTop: '10',
+        marginTop: 10,
         paddingHorizontal: 10,
         fontSize: 18,
         color: 'white',
@@ -230,13 +233,7 @@ const styles = StyleSheet.create({
     taskListContainer: {
         flex: 1,
   },
-  percentageText: {
-    fontSize: 18,
-    color: "white",
-    textAlign: "center",
-    marginTop: 20,
-    marginBottom: 20,
-    fontWeight: 'bold',
-  },
+
+
 });
 
