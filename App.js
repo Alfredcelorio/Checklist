@@ -1,9 +1,26 @@
 import React, { useState, useRef } from "react";
-import { StyleSheet, TouchableOpacity, Text, TextInput, KeyboardAvoidingView, Platform, ScrollView, View, Animated } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, TextInput, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { Box, Button, Input, NativeBaseProvider } from 'native-base';
 import { ProgressCircle } from 'react-native-svg-charts';
+
+const TaskProgressChart = ({ completedTasks, totalTasks }) => {
+    const percentageCompleted = (completedTasks / totalTasks) * 100;
+
+    return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom:100, marginTop:100}}>
+        <ProgressCircle
+            style={{ height: 400, width: '100%'  }}
+            progress={percentageCompleted / 100}
+            progressColor='green'
+        />
+        <Text style={styles.percentageText}>
+            {`${percentageCompleted.toFixed(2)}%`}
+        </Text>
+    </View>
+    );
+};
 
 const initialTasks = [
     { key: '1', label: 'Buy groceries', completed: false },
@@ -14,8 +31,6 @@ export default function App() {
     const [newTask, setNewTask] = useState('');
     const [editingKey, setEditingKey] = useState(null);
     const [editingValue, setEditingValue] = useState('');
-    const [showPercentage, setShowPercentage] = useState(false);
-    const fadeAnim = useRef(new Animated.Value(1)).current;
 
     const completedTasks = tasks.filter(task => task.completed).length;
     const unmarkedTasks = tasks.length - completedTasks;
@@ -72,16 +87,6 @@ export default function App() {
         );
     };
 
-    const togglePercentage = () => {
-        const newValue = showPercentage ? 0 : 1;
-        setShowPercentage(!showPercentage);
-        Animated.timing(fadeAnim, {
-          toValue: newValue,
-          duration: 10,
-          useNativeDriver: true,
-        }).start();
-      };
-
     const percentageCompleted = (completedTasks / tasks.length) * 100;
 
 
@@ -97,6 +102,8 @@ export default function App() {
                 />
             );
         }
+   
+        
 
 
         return (
@@ -123,20 +130,7 @@ export default function App() {
                     <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
                     <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
                 </Box>
-                <View style={styles.chartContainer}>
-                <ProgressCircle
-                        style={{ height: 400 }}
-                        progress={completedTasks / tasks.length}
-                        progressColor='green'
-                    />
-                    <Animated.Text style={{ ...styles.percentageText, opacity: fadeAnim }}>
-                   {`${percentageCompleted.toFixed(2)}%`}
-                    </Animated.Text>
-
-                    </View>
-                    
-                 
-                  
+                <TaskProgressChart completedTasks={completedTasks} totalTasks={tasks.length} />     
                 <View style={styles.taskListContainer}>
                     <DraggableFlatList
                         data={tasks}
@@ -152,13 +146,9 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-    chartContainer: {
-        borderColor: 'black',
-        borderWidth: 2,
-        marginBottom: 100,
-        alignItems: 'center',
-        justifyContent: 'center',
-
+    container: {
+        flex: 1,
+        backgroundColor: 'black',
     },
     percentageText: {
         position: 'absolute',
@@ -166,12 +156,9 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: 'bold',
         textAlign: "center",
+        
     },
 
-    container: {
-        flex: 1,
-        backgroundColor: 'black',
-    },
     rowItem: {
         height: 50,
         width: '100%',
