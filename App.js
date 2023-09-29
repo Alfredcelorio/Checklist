@@ -31,7 +31,7 @@ export default function App() {
         {
             key: 2,
             value: unmarkedTasks,
-            svg: { fill: 'red' },
+            svg: { fill: 'black' },
             arc: { outerRadius: '140%', cornerRadius: 13 },
         },
     ];
