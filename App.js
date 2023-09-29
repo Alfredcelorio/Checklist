@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
-import { StyleSheet, TouchableOpacity, Text, TextInput, View } from "react-native";
+import { StyleSheet, TouchableOpacity,TextInput, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-import { Box, Button, Input, NativeBaseProvider } from 'native-base';
+import { Box, Button, Input,Text, NativeBaseProvider } from 'native-base';
 import { ProgressCircle } from 'react-native-svg-charts';
 
 const TaskProgressChart = ({ completedTasks, totalTasks }) => {
@@ -11,14 +11,15 @@ const TaskProgressChart = ({ completedTasks, totalTasks }) => {
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom:100, marginTop:100}}>
         <ProgressCircle
-            style={{ height: 400, width: '100%'  }}
+            style={{ height: 400, width: '80%'   }}
             progress={percentageCompleted / 100}
             progressColor='green'
+            strokeWidth={15}
         />
-        <Text style={styles.percentageText}>
-            {`${percentageCompleted.toFixed(2)}%`}
+        <Text style={styles.percentagePosition} color="white" fontSize="4xl" fontWeight="bold" textAlign="center">
+        {`${percentageCompleted.toFixed(2)}%`}
         </Text>
-    </View>
+        </View>
     );
 };
 
@@ -126,6 +127,7 @@ export default function App() {
         <NativeBaseProvider>
             <GestureHandlerRootView style={styles.container}>
                 <Box backgroundColor="black" height={100} width="100%"></Box>
+                <Text color="white" mb="4" bold fontSize="4xl"> Welcome, Alvaro  </Text>
                 <Box alignItems="center" style={styles.footer}>
                     <Input mx="5" placeholder="Enter new task." w="100%" value={newTask} marginBottom={5} onChangeText={setNewTask} />
                     <Button onPress={addNewTask} style={styles.addButton}>Add Task</Button>
@@ -150,15 +152,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'black',
     },
-    percentageText: {
+    percentagePosition: {
         position: 'absolute',
-        fontSize: 50,
-        color: "white",
-        fontWeight: 'bold',
-        textAlign: "center",
-        
     },
-
+    
     rowItem: {
         height: 50,
         width: '100%',
