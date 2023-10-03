@@ -5,6 +5,14 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "ios": {
+      "icon": "./assets/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5559a0dd-f622-4fb9-bfc9-bd8bc209e87b"
+      }
+    }
   }
 }

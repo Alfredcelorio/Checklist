@@ -24,7 +24,7 @@ const TaskProgressChart = ({ completedTasks, totalTasks }) => {
 };
 
 const initialTasks = [
-    { key: '1', label: 'Buy groceries', completed: false },
+    { key: '1', label: 'Your first task here', completed: false },
 ];
 
 export default function App() {
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     percentagePosition: {
         position: 'absolute',
     },
-    
+
     rowItem: {
         height: 50,
         width: '100%',
