@@ -3,12 +3,8 @@
     "name": "Nombre_del_proyecto",
     "slug": "Nombre_del_proyecto",
     "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "icon": "./assets/icon.png"
-    },
+    "assetBundlePatterns": ["**/*"],
+    "icon": "./icon.png",
     "extra": {
       "eas": {
         "projectId": "5559a0dd-f622-4fb9-bfc9-bd8bc209e87b"
@@ -16,3 +12,4 @@
     }
   }
 }
+
